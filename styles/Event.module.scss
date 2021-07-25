@@ -1,0 +1,32 @@
+.event {
+  position: relative;
+  padding-top: 4rem;
+
+  h3 {
+    font-size: 2.5rem;
+  }
+
+  p {
+    margin: 1rem 0;
+    font-size: 1.5rem;
+  }
+}
+
+.span {
+  font-size: 1.5rem;
+}
+
+.image {
+  margin-bottom: 2rem;
+}
+
+.controls {
+  position: absolute;
+  right: 3rem;
+  top: 0;
+}
+
+.delete {
+  margin-left: 2rem;
+  color: red;
+}

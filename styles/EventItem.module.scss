@@ -1,0 +1,38 @@
+@import "variables";
+
+.event {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 2rem 0;
+  padding: 1.5rem;
+  box-shadow: 2px 3px 0.5rem rgba($color-black, 0.1);
+}
+
+.img {
+  flex: 1;
+  margin: 1rem;
+  width: 17rem;
+  height: 10rem;
+}
+
+.info {
+  flex: 2;
+  h3 {
+    font-size: 2rem;
+  }
+  span {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 60rem) {
+  .event {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .info {
+    margin-bottom: 2rem;
+  }
+}

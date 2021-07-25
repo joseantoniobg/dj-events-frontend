@@ -1,0 +1,58 @@
+@import "variables";
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var($color-white);
+  color: var($color-dark-grey);
+  height: 6rem;
+  padding: 0 3rem;
+  box-shadow: 0 2px 0.5rem rgba($color-black, 0.1);
+}
+
+.header a {
+  color: $color-dark-grey;
+  margin-right: 2rem;
+}
+
+.header a:hover {
+  color: var($color-black);
+}
+.header ul {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  list-style: none;
+}
+
+.logo {
+  color: red;
+  font-size: 2rem;
+  text-transform: uppercase;
+}
+
+.logo a {
+  color: red;
+}
+
+@media (max-width: 76.8rem) {
+  .header {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .header ul {
+    margin: 2rem 0;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .header a {
+    margin-right: 0;
+  }
+
+  .logo {
+    margin: 2rem 0;
+  }
+}
