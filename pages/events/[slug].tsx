@@ -1,17 +1,32 @@
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import { FaPencilAlt, FaTimes } from 'react-icons/fa';
-import router, { useRouter } from 'next/router';
+import { useRouter } from 'next/router';
 import Layout from '@components/Layout';
-import { API_URL } from '@config/index';
+import { API_URL, api } from '@config/index';
 import styles from "@styles/Event.module.scss";
 import Link from 'next/link';
 import Image from 'next/image';
 import { getDateAsStringDDMMYYYY } from '../../helpers/helpers';
+import axios, { AxiosRequestConfig } from "axios";
 
 export default function EventPage({event}) {
   const r = useRouter()
 
-  const deleteEvent = (e) => {
-    console.log('delete');
+  const deleteEvent = async (id) => {
+    if (confirm('Are you sure???')) {
+      const config: AxiosRequestConfig = {
+        url: `/events/${id}`,
+        method: 'DELETE',
+      }
+
+      const resp = await api.request(config).catch((e) => toast.error(e.message));
+
+      console.log(resp);
+
+      r.push('/events');
+    }
   }
 
   return (
@@ -23,7 +38,7 @@ export default function EventPage({event}) {
               <FaPencilAlt /> Edit Event
             </a>
           </Link>
-          <a href="#" className={styles.delete} onClick={deleteEvent}>
+          <a href="#" className={styles.delete} onClick={() => deleteEvent(event.id)}>
             <FaTimes /> Delete Event
           </a>
         </div>
@@ -31,6 +46,7 @@ export default function EventPage({event}) {
           {getDateAsStringDDMMYYYY(event.date)} at {event.time}
         </span>
         <h1>{event.name}</h1>
+        <ToastContainer />
         {event.image && (<div className={styles.image}><Image src={event.image.formats.large.url} width={960}
         height={600} /></div> )}
         <h3>Performers:</h3>
