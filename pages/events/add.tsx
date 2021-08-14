@@ -1,6 +1,7 @@
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import { parseCookies } from '@helpers/helpers';
 import {useState} from 'react';
 import {useRouter} from 'next/router';
 import Layout from '@components/Layout';
@@ -9,7 +10,7 @@ import { api } from '@config/index';
 import styles from '@styles/Form.module.scss';
 import Link from 'next/link';
 
-export default function AddEventPage() {
+export default function AddEventPage({token}) {
   const [ values, setValues ] = useState({
     name: '',
     performers: '',
@@ -26,6 +27,7 @@ export default function AddEventPage() {
 
     if (hasEmptyFields) {
       toast.error('Please fill all the fields');
+      return;
     }
 
     const config: AxiosRequestConfig = {
@@ -33,13 +35,18 @@ export default function AddEventPage() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
       },
       data: {
         ...values
       }
     }
 
-    const resp = await api.request(config).catch((e) => toast.error('Something went wrong with request'));
+    console.log(config);
+
+    const resp = await api.request(config).catch((e) => {toast.error('Something went wrong with request')
+    console.log(e);
+  });
 
     if (typeof resp === 'object') {
       router.push(`/events/${resp.data.slug}`);
@@ -93,4 +100,13 @@ export default function AddEventPage() {
       </form>
     </Layout>
   )
+}
+
+export async function getServerSideProps ({req}) {
+  const {token} = parseCookies(req);
+  return {
+    props: {
+      token: token
+    }
+  }
 }

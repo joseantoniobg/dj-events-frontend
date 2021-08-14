@@ -5,13 +5,16 @@ import {useState} from 'react';
 import moment from 'moment';
 import {useRouter} from 'next/router';
 import Layout from '@components/Layout';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { api } from '@config/index';
 import styles from '@styles/Form.module.scss';
 import Link from 'next/link';
 import Image from 'next/image';
+import Modal from '@components/Modal';
+import ImageUpload from '../../../components/ImageUpload';
+import { parseCookies } from '../../../helpers/helpers';
 
-export default function EditEventPage({event}) {
+export default function EditEventPage({event, token}) {
   const [ values, setValues ] = useState({
     name: event.name,
     performers: event.performers,
@@ -23,6 +26,8 @@ export default function EditEventPage({event}) {
   });
 
   const [ imagePreview, setImagePreview ] = useState(event.image ? event.image.formats.thumbnail.url : null);
+
+  const [ showModal, setShowModal ] = useState(false);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -37,6 +42,7 @@ export default function EditEventPage({event}) {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
       },
       data: {
         ...values
@@ -58,6 +64,15 @@ export default function EditEventPage({event}) {
   const router = useRouter();
 
   console.log(imagePreview);
+
+  const imageUploaded = async (e) => {
+    const res = await api.request({
+      url: `/events/${event.id}`,
+      method: 'GET',
+    })
+    setImagePreview(res.data.image.formats.thumbnail.url);
+    setShowModal(false);
+  };
 
   return (
     <Layout title='Edit Event'>
@@ -100,19 +115,24 @@ export default function EditEventPage({event}) {
       <h2>Event Image</h2>
       {imagePreview ? <Image src={imagePreview} height={100} width={180} /> : <div><p>No image uploaded</p></div>}
       <div>
-        <button className="btn-secondary">
+        <button onClick={() => setShowModal(true)} className="btn-secondary">
           <FaImage /> Set Image
         </button>
+        <Modal title={'Image Preview'} show={showModal} onClose={() => setShowModal(false)}>
+          <ImageUpload evtId={event.id} imageUploaded={imageUploaded} token={token} />
+        </Modal>
       </div>
     </Layout>
   )
 }
 
-export async function getServerSideProps({ params: {id} }) {
+export async function getServerSideProps({ params: {id}, req }) {
   const resp = await api.get(`events/${id}`);
+  const {token} = parseCookies(req);
   return {
     props: {
       event: resp.data,
+      token,
     }
   }
 }

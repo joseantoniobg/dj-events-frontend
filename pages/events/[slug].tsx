@@ -8,46 +8,44 @@ import { API_URL, api } from '@config/index';
 import styles from "@styles/Event.module.scss";
 import Link from 'next/link';
 import Image from 'next/image';
-import { getDateAsStringDDMMYYYY } from '../../helpers/helpers';
-import axios, { AxiosRequestConfig } from "axios";
+import { getDateAsStringDDMMYYYY, parseCookies } from '../../helpers/helpers';
+import AuthContext from "@context/AuthContext";
+import { useContext } from 'react';
+import { deleteEvent } from "../../helpers/helpers";
 
-export default function EventPage({event}) {
+export default function EventPage({event, token}) {
   const r = useRouter()
+  const { user } = useContext(AuthContext);
 
-  const deleteEvent = async (id) => {
-    if (confirm('Are you sure???')) {
-      const config: AxiosRequestConfig = {
-        url: `/events/${id}`,
-        method: 'DELETE',
-      }
-
-      const resp = await api.request(config).catch((e) => toast.error(e.message));
-
-      console.log(resp);
-
-      r.push('/events');
+  const deleteEvt = async (id, token) => {
+    try {
+     await deleteEvent(id, token);
+    } catch (e) {
+      toast.error(e.message);
     }
+    r.push('/events');
   }
 
   return (
     <Layout title={event.name}>
      <div className={styles.event}>
-        <div className={styles.controls}>
+       {event.user.username === (user ? user.username : '') && <div className={styles.controls}>
           <Link href={`/events/edit/${event.id}`}>
             <a>
               <FaPencilAlt /> Edit Event
             </a>
           </Link>
-          <a href="#" className={styles.delete} onClick={() => deleteEvent(event.id)}>
+          <a href="#" className={styles.delete} onClick={() => deleteEvt(event.id, token)}>
             <FaTimes /> Delete Event
           </a>
-        </div>
+        </div>}
         <span className={styles.span}>
           {getDateAsStringDDMMYYYY(event.date)} at {event.time}
         </span>
         <h1>{event.name}</h1>
         <ToastContainer />
-        {event.image && (<div className={styles.image}><Image src={event.image.formats.large.url} width={960}
+        {console.log(event.image)}
+        {event.image && (<div className={styles.image}><Image src={event.image.formats.small.url} width={960}
         height={600} /></div> )}
         <h3>Performers:</h3>
         <p>{event.performers}</p>
@@ -64,24 +62,11 @@ export default function EventPage({event}) {
   )
 }
 
-export const getStaticPaths = async () => {
-  const resp = await fetch(`${API_URL}events`);
-  const events = await resp.json();
-
-  const paths = events.map((event) => ({
-    params: { slug: event.slug }
-  }))
-
-  return {
-    paths,
-    fallback: false, //fallback indicates if a non supplied path is send in, if we want to check and fetch data we set it to true and if not, set it fo false
-  }
-}
-
-export const getStaticProps = async ({ params: { slug } }) => {
+export const getServerSideProps = async ({ params: { slug }, req }) => {
   const data = await fetch(`${API_URL}events?slug=${slug}`)
   const event = await data.json()
-  return { props: { event: event[0] }, revalidate: 1 }
+  const {token} = parseCookies(req);
+  return { props: { event: event[0], token } }
 }
 
 // export const getServerSideProps = async ({ query: { slug } }) => {
